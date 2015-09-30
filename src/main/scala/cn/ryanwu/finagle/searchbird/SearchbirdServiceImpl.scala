@@ -7,8 +7,12 @@ import java.util.concurrent.Executors
 import scala.collection.mutable
 import cn.ryanwu.finagle.searchbird.thriftscala.SearchbirdService
 import cn.ryanwu.finagle.searchbird.thriftscala.SearchbirdException
+import com.twitter.ostrich.admin.Service
+import java.util.concurrent.atomic.AtomicBoolean
 
-class SearchbirdServiceImpl extends SearchbirdService[Future] {
+class SearchbirdServiceImpl extends SearchbirdService.FutureIface with Service {
+
+    private val running = new AtomicBoolean(false)
 
     val database = new mutable.HashMap[String, String]()
 
@@ -24,6 +28,14 @@ class SearchbirdServiceImpl extends SearchbirdService[Future] {
     def put(key: String, value: String) = {
         database(key) = value
         Future.Unit
+    }
+
+    def start() {
+        running.set(true)
+    }
+
+    def shutdown() {
+        running.set(false)
     }
 
 }
